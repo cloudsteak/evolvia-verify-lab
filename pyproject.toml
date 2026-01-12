@@ -11,6 +11,7 @@ dependencies = [
     "azure-mgmt-search>=9.2.0",
     "azure-mgmt-web>=10.1.0",
     "azure-search-documents>=11.6.0",
+    "email-validator>=2.3.0",
     "fastapi>=0.128.0",
     "uvicorn>=0.40.0",
 ]
