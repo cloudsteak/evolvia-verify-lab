@@ -1,0 +1,19 @@
+{
+  "cloud": "azure",
+  "checks": {
+    "vm": {
+      "prefix": "linux-",
+      "size": "Standard_B1s",
+      "os_type": "Linux",
+      "count": 2
+    },
+    "vnet": {
+      "prefix": "halozat-"
+    },
+    "lb": {
+      "prefix": "eloszto-",
+      "type": "Public",
+      "sku": "Standard"
+    }
+  }
+}

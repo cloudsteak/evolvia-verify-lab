@@ -1,0 +1,12 @@
+{
+  "cloud": "azure",
+  "checks": {
+    "webapp": {
+      "prefix": "weboldal-",
+      "count": 1
+    },
+    "app_service_plan": {
+      "sku": "B2"
+    }
+  }
+}

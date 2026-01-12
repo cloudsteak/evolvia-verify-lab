@@ -1,0 +1,20 @@
+{
+  "cloud": "azure",
+  "checks": {
+    "vmss": {
+      "prefix": "vgm-",
+      "instance_count": 3,
+      "size": "Standard_B1s",
+      "os_type": "Linux",
+      "count": 1
+    },
+    "vnet": {
+      "prefix": "halozat-"
+    },
+    "lb": {
+      "prefix": "eloszto-",
+      "type": "Public",
+      "sku": "Standard"
+    }
+  }
+}
