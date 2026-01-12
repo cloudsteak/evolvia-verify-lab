@@ -1,0 +1,14 @@
+{
+  "cloud": "azure",
+  "checks": {
+    "vm": {
+      "prefix": "linux-",
+      "size": "Standard_B1s",
+      "os_type": "Linux",
+      "count": 1
+    },
+    "vnet": {
+      "prefix": "halozat-"
+    }
+  }
+}

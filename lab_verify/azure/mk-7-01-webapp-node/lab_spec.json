@@ -1,0 +1,13 @@
+{
+  "cloud": "azure",
+  "checks": {
+    "webapp": {
+      "prefix": "weboldal-",
+      "runtime_stack": "NODE|22-lts",
+      "count": 1
+    },
+    "app_service_plan": {
+      "sku": "B2"
+    }
+  }
+}

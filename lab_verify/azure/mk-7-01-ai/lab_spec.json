@@ -1,0 +1,10 @@
+{
+  "cloud": "azure",
+  "checks": {
+    "search": {
+      "prefix": "search-",
+      "index": "dokumentumok",
+      "count": 1
+    }
+  }
+}
