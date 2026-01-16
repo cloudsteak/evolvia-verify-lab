@@ -145,3 +145,7 @@ dmypy.json
 Network Trash Folder
 Temporary Items
 .apdisk
+
+
+# Kerno files
+.kerno/**
