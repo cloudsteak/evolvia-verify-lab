@@ -6,12 +6,17 @@ on:
       - "main"
     paths:
       - Dockerfile
+      - "*.py"
+      - "checks/**"
       - pyproject.toml
-      - poetry.lock
+      - uv.lock
       - .github/workflows/staging-build.yml
 
 jobs:
   build:
+    strategy:
+      matrix:
+        provider: [azure, aws, gcp]
     uses: cloudsteak/cm-workflows/.github/workflows/staging-build-push.yml@1.3.0
     with:
-      image_name: evolvia-verify-lab
+      image_name: evolvia-verify-lab-${{ matrix.provider }}

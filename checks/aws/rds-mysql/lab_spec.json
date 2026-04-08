@@ -1,0 +1,12 @@
+{
+  "cloud": "aws",
+  "checks": {
+    "db_instance": {
+      "prefix": "mysql-",
+      "engine": "mysql",
+      "instance_class": "db.t3.micro",
+      "count": 1,
+      "expected_status": "available"
+    }
+  }
+}

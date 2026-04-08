@@ -1,0 +1,12 @@
+{
+  "cloud": "aws",
+  "checks": {
+    "bucket": {
+      "prefix": "weboldal-",
+      "count": 1
+    },
+    "website": {
+      "index_document": "index.html"
+    }
+  }
+}

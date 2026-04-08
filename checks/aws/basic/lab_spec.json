@@ -1,0 +1,13 @@
+{
+  "cloud": "aws",
+  "checks": {
+    "instance": {
+      "prefix": "linux-",
+      "instance_type": "t3.micro",
+      "count": 1
+    },
+    "vpc": {
+      "prefix": "halozat-"
+    }
+  }
+}

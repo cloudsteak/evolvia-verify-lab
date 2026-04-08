@@ -1,0 +1,13 @@
+{
+  "cloud": "gcp",
+  "checks": {
+    "instance": {
+      "prefix": "linux-",
+      "machine_type": "e2-micro",
+      "count": 1
+    },
+    "network": {
+      "prefix": "halozat-"
+    }
+  }
+}
