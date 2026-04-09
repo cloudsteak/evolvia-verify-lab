@@ -16,6 +16,12 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/info")
+def info():
+    settings = get_settings()
+    return {"provider": settings.provider, "version": app.version}
+
+
 @app.post("/v1/verify", response_model=VerifyResponse)
 def verify(
     payload: VerifyRequest,
@@ -31,7 +37,7 @@ def verify(
         email=payload.email,
         cloud=payload.cloud,
         lab=payload.lab,
-        subscription_id=settings.azure_subscription_id,
+        settings=settings,
     )
 
     return VerifyResponse(success=result["success"], message=result["message"])

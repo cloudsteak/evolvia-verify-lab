@@ -1,0 +1,14 @@
+{
+  "cloud": "aws",
+  "checks": {
+    "instance": {
+      "prefix": "web-",
+      "instance_type": "t3.micro",
+      "count": 1
+    },
+    "website": {
+      "port": 80,
+      "expected_status_codes": [200, 301, 302]
+    }
+  }
+}
