@@ -31,7 +31,7 @@ Example response:
 ```json
 {
   "provider": "azure",
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
 ```
 
@@ -57,7 +57,10 @@ Content-Type: application/json
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `PROVIDER` | Yes | Active provider: `azure`, `aws`, or `gcp` |
-| `INTERNAL_VERIFY_API_KEY` | No | API key for authentication |
+| `INTERNAL_VERIFY_API_KEY` | No | Legacy common API key for authentication |
+| `INTERNAL_VERIFY_AZURE_API_KEY` | No | Azure verify API key; falls back to the common key |
+| `INTERNAL_VERIFY_AWS_API_KEY` | No | AWS verify API key; falls back to the common key |
+| `INTERNAL_VERIFY_GCP_API_KEY` | No | GCP verify API key; falls back to the common key |
 
 ### Azure
 
