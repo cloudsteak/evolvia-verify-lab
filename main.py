@@ -6,7 +6,7 @@ from verify_lab import verify_lab
 
 app = FastAPI(
     title="Evolvia Verify Lab",
-    version="0.1.1",
+    version="0.1.2",
     description="Lab verification microservice for CloudMentor",
 )
 
