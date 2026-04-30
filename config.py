@@ -23,6 +23,20 @@ def _require_env(value: str | None, env_name: str, provider: str) -> str:
     return value
 
 
+def _get_internal_api_key(provider: str) -> str | None:
+    provider_specific_env = {
+        "azure": "INTERNAL_VERIFY_AZURE_API_KEY",
+        "aws": "INTERNAL_VERIFY_AWS_API_KEY",
+        "gcp": "INTERNAL_VERIFY_GCP_API_KEY",
+    }
+
+    provider_key = os.getenv(provider_specific_env[provider], None)
+    if provider_key is not None:
+        return provider_key
+
+    return os.getenv("INTERNAL_VERIFY_API_KEY", None)
+
+
 def get_settings() -> Settings:
     provider = os.getenv("PROVIDER", "azure")
 
@@ -40,7 +54,7 @@ def get_settings() -> Settings:
         aws_region=os.getenv("AWS_REGION", None),
         aws_account_id=os.getenv("AWS_ACCOUNT_ID", None),
         gcp_project_id=os.getenv("GCP_PROJECT_ID", None),
-        internal_api_key=os.getenv("INTERNAL_VERIFY_API_KEY"),
+        internal_api_key=_get_internal_api_key(provider),
     )
 
     if provider == "azure":
