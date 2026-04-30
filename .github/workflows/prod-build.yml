@@ -8,6 +8,7 @@ jobs:
     strategy:
       matrix:
         provider: [azure, aws, gcp]
-    uses: cloudsteak/cm-workflows/.github/workflows/production-build-push.yml@1.3.0
+    uses: cloudsteak/cm-workflows/.github/workflows/production-build-push.yml@1.4.0
     with:
       image_name: evolvia-verify-lab-${{ matrix.provider }}
+      build_args: PROVIDER=${{ matrix.provider }}
