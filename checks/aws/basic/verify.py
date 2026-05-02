@@ -17,7 +17,6 @@ def _get_name_tag(tags: list[dict] | None) -> str | None:
 
 
 def run_verification(user: str, lab: str, email: str, **provider_config) -> dict:
-    region = provider_config["region"]
     account_id = provider_config["account_id"]
 
     try:
@@ -25,6 +24,7 @@ def run_verification(user: str, lab: str, email: str, **provider_config) -> dict
         with open(spec_path, "r", encoding="utf-8") as file:
             spec = json.load(file)
 
+        region = spec["region"]
         checks = spec["checks"]
         ec2 = boto3.client("ec2", region_name=region)
         sts = boto3.client("sts", region_name=region)
@@ -77,27 +77,15 @@ def run_verification(user: str, lab: str, email: str, **provider_config) -> dict
                         ),
                     }
 
-            vpc_spec = checks["vpc"]
-            vpcs = ec2.describe_vpcs()["Vpcs"]
-            matching_vpc = next(
-                (
-                    vpc
-                    for vpc in vpcs
-                    if (_get_name_tag(vpc.get("Tags")) or "").startswith(
-                        vpc_spec["prefix"]
-                    )
-                ),
-                None,
-            )
-
-            if not matching_vpc:
-                return {
-                    "success": False,
-                    "message": (
-                        f"Nem található olyan VPC, amely "
-                        f"'{vpc_spec['prefix']}' prefixszel kezdődik."
-                    ),
-                }
+                if instance["ImageId"] != instance_spec["image_id"]:
+                    return {
+                        "success": False,
+                        "message": (
+                            f"EC2 instance image-je hibás: "
+                            f"{instance['InstanceId']} - {instance['ImageId']}. "
+                            f"Elvárt: {instance_spec['image_id']}"
+                        ),
+                    }
 
             return {"success": True, "message": "Lab sikeresen ellenőrizve."}
         except ClientError as error:

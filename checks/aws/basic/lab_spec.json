@@ -1,13 +1,12 @@
 {
   "cloud": "aws",
+  "region": "eu-north-1",
   "checks": {
     "instance": {
       "prefix": "linux-",
       "instance_type": "t3.micro",
+      "image_id": "ami-09e320d375d7b8d3e",
       "count": 1
-    },
-    "vpc": {
-      "prefix": "halozat-"
     }
   }
 }
