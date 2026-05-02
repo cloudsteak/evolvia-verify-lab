@@ -75,8 +75,9 @@ Content-Type: application/json
 
 | Variable | Required When | Description |
 |----------|---------------|-------------|
-| `AWS_REGION` | `PROVIDER=aws` | AWS region for EC2 and VPC checks |
 | `AWS_ACCOUNT_ID` | `PROVIDER=aws` | Expected AWS account ID |
+
+> **Megjegyzés:** Az AWS régió a lab `lab_spec.json` fájljából kerül beolvasásra, nem környezeti változóból.
 
 Available AWS labs:
 
