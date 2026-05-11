@@ -23,6 +23,10 @@ def _validate(body: dict) -> str | None:
 
 
 def lambda_handler(event, context):
+    if event.get("warmup"):
+        logger.info("Warmup hívás — kihagyás")
+        return {}
+
     request_context = event.get("requestContext", {})
     source_ip = (
         request_context.get("http", {}).get("sourceIp")

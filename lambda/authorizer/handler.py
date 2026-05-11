@@ -12,6 +12,10 @@ logger.setLevel(os.environ.get("LOG_LEVEL", "INFO").upper())
 
 
 def lambda_handler(event, context):
+    if event.get("warmup"):
+        logger.info("Warmup hívás — kihagyás")
+        return {"isAuthorized": False}
+
     try:
         api_key = (event.get("headers") or {}).get("x-api-key", "")
         ssm = boto3.client("ssm")
