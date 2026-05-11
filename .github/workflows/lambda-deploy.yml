@@ -1,0 +1,38 @@
+name: Lambda - Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "lambda/**"
+      - "checks/**/lab_spec.json"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-north-1
+
+      - name: Build and upload authorizer
+        run: |
+          cd lambda/authorizer
+          zip handler.zip handler.py
+          aws s3 cp handler.zip s3://${{ secrets.LAMBDA_S3_BUCKET }}/authorizer/handler.zip
+
+      - name: Build and upload aws/basic
+        run: |
+          cd lambda/aws/basic
+          cp ../../../checks/aws/basic/lab_spec.json .
+          zip handler.zip handler.py lab_spec.json
+          aws s3 cp handler.zip s3://${{ secrets.LAMBDA_S3_BUCKET }}/aws/basic/handler.zip
