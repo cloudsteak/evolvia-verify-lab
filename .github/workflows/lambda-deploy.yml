@@ -25,6 +25,17 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-north-1
 
+      - name: Build and upload dispatcher
+        run: |
+          cd lambda/dispatcher
+          zip handler.zip handler.py
+          aws s3 cp handler.zip s3://${{ secrets.LAMBDA_S3_BUCKET }}/dispatcher/handler.zip
+          aws lambda update-function-code \
+            --function-name evolvia-verify-dispatcher \
+            --s3-bucket ${{ secrets.LAMBDA_S3_BUCKET }} \
+            --s3-key dispatcher/handler.zip \
+            --region eu-north-1
+
       - name: Build and upload authorizer
         run: |
           cd lambda/authorizer
