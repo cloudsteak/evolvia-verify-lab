@@ -42,7 +42,9 @@ def _verify(account_id: str) -> dict:
     logger.debug("sts:GetCallerIdentity válasz: account_id=%s", current_account_id)
 
     if current_account_id != account_id:
-        msg = f"Hibás AWS account azonosító: {current_account_id}. Elvárt: {account_id}."
+        msg = (
+            f"Hibás AWS account azonosító: {current_account_id}. Elvárt: {account_id}."
+        )
         logger.warning("Ellenőrzés sikertelen: %s", msg)
         return {"success": False, "message": msg}
 
