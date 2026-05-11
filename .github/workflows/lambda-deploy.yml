@@ -10,6 +10,7 @@ on:
 
 jobs:
   deploy:
+    name: Build and Deploy Lambda Functions
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -29,6 +30,11 @@ jobs:
           cd lambda/authorizer
           zip handler.zip handler.py
           aws s3 cp handler.zip s3://${{ secrets.LAMBDA_S3_BUCKET }}/authorizer/handler.zip
+          aws lambda update-function-code \
+            --function-name evolvia-verify-authorizer \
+            --s3-bucket ${{ secrets.LAMBDA_S3_BUCKET }} \
+            --s3-key authorizer/handler.zip \
+            --region eu-north-1
 
       - name: Build and upload aws/basic
         run: |
@@ -36,3 +42,8 @@ jobs:
           cp ../../../checks/aws/basic/lab_spec.json .
           zip handler.zip handler.py lab_spec.json
           aws s3 cp handler.zip s3://${{ secrets.LAMBDA_S3_BUCKET }}/aws/basic/handler.zip
+          aws lambda update-function-code \
+            --function-name evolvia-verify-aws-basic \
+            --s3-bucket ${{ secrets.LAMBDA_S3_BUCKET }} \
+            --s3-key aws/basic/handler.zip \
+            --region eu-north-1
