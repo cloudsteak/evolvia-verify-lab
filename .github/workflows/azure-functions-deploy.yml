@@ -51,13 +51,37 @@ jobs:
             --resource-group "${{ vars.AZURE_VERIFY_RESOURCE_GROUP }}" \
             --name "${{ vars.AZURE_VERIFY_FUNCTION_APP }}"
 
+      - name: Wait for Function App health
+        env:
+          RG: ${{ vars.AZURE_VERIFY_RESOURCE_GROUP }}
+          APP: ${{ vars.AZURE_VERIFY_FUNCTION_APP }}
+        run: |
+          # Python v2 (@app.route) apps often report 0 via `az functionapp function list`
+          # even when routes are live — poll the health endpoint instead.
+          FUNCTION_KEY=$(az functionapp keys list -g "$RG" -n "$APP" --query "functionKeys.default" -o tsv)
+          HOST=$(az functionapp show -g "$RG" -n "$APP" --query defaultHostName -o tsv)
+          for i in $(seq 1 18); do
+            response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+              -H "x-functions-key: ${FUNCTION_KEY}" \
+              "https://${HOST}/api/health")
+            body="${response%HTTP_CODE:*}"
+            code="${response##*HTTP_CODE:}"
+            echo "Attempt ${i}: HTTP ${code}"
+            if [ "${code}" = "200" ] && echo "${body}" | grep -q '"status":"ok"'; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Function App health check failed"
+          echo "Body: ${body}"
+          exit 1
+
       - name: Sync APIM function key
         env:
           RG: ${{ vars.AZURE_VERIFY_RESOURCE_GROUP }}
           APP: ${{ vars.AZURE_VERIFY_FUNCTION_APP }}
           APIM: ${{ vars.AZURE_VERIFY_APIM_NAME }}
         run: |
-          sleep 60
           FUNCTION_KEY=$(az functionapp keys list -g "$RG" -n "$APP" --query "functionKeys.default" -o tsv)
           az apim nv update \
             -g "$RG" \
@@ -66,28 +90,17 @@ jobs:
             --value "$FUNCTION_KEY" \
             --secret true
 
-      - name: Wait for functions to register
-        env:
-          RG: ${{ vars.AZURE_VERIFY_RESOURCE_GROUP }}
-          APP: ${{ vars.AZURE_VERIFY_FUNCTION_APP }}
+      - name: Smoke test APIM health
         run: |
-          for i in $(seq 1 12); do
-            count=$(az functionapp function list -g "$RG" -n "$APP" --query "length(@)" -o tsv)
-            echo "Registered functions: ${count}"
-            if [ "${count}" -gt 0 ]; then
+          for i in $(seq 1 6); do
+            response=$(curl -s -w "\nHTTP_CODE:%{http_code}" "${{ vars.AZURE_VERIFY_HEALTH_CHECK_URL }}")
+            body="${response%HTTP_CODE:*}"
+            code="${response##*HTTP_CODE:}"
+            echo "Attempt ${i}: HTTP ${code}"
+            echo "Body: ${body}"
+            if [ "${code}" = "200" ] && echo "${body}" | grep -q '"status":"ok"'; then
               exit 0
             fi
             sleep 10
           done
-          echo "No functions registered after remote build"
           exit 1
-
-      - name: Smoke test APIM health
-        run: |
-          response=$(curl -s -w "\nHTTP_CODE:%{http_code}" "${{ vars.AZURE_VERIFY_HEALTH_CHECK_URL }}")
-          body="${response%HTTP_CODE:*}"
-          code="${response##*HTTP_CODE:}"
-          echo "Health check returned HTTP ${code}"
-          echo "Body: ${body}"
-          test "${code}" = "200"
-          echo "${body}" | grep -q '"status":"ok"'
