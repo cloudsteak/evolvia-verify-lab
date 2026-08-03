@@ -16,7 +16,7 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 
 @app.route(route="health", methods=["GET"])
-def health(_req: func.HttpRequest) -> func.HttpResponse:
+def health(req: func.HttpRequest) -> func.HttpResponse:
     return json_response({"status": "ok"})
 
 
