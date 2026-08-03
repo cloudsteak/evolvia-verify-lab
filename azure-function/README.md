@@ -67,6 +67,8 @@ tofu output -raw apim_name
 tofu output -raw health_check_url
 ```
 
+If `apim_name` fails, run `tofu apply` in `50-verify` first.
+
 | Variable | Output |
 |----------|--------|
 | `AZURE_VERIFY_RESOURCE_GROUP` | `resource_group_name` |
