@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# Build deploy zip for Azure Functions (uv + pyproject.toml, like the Docker image).
+# Build deploy zip for Azure Functions (uv export → requirements.txt, remote build on Azure).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 STAGING="$(mktemp -d)"
 ZIP_PATH="${SCRIPT_DIR}/release.zip"
-PYTHON_VERSION="3.12"
 
 cleanup() {
   rm -rf "${STAGING}"
@@ -28,13 +27,6 @@ touch "${STAGING}/checks/__init__.py" "${STAGING}/checks/azure/__init__.py"
 cd "${REPO_ROOT}"
 uv export --extra azure --frozen --no-dev --no-emit-project --no-hashes \
   -o "${STAGING}/requirements.txt"
-
-uv pip install \
-  --python "${PYTHON_VERSION}" \
-  --target "${STAGING}/.python_packages/lib/site-packages" \
-  -r "${STAGING}/requirements.txt"
-
-rm "${STAGING}/requirements.txt"
 
 cd "${STAGING}"
 rm -f "${ZIP_PATH}"

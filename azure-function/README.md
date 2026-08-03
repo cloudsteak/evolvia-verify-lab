@@ -21,7 +21,7 @@ Same as the Docker image — **`pyproject.toml`** + **`uv.lock`**, `azure` extra
 uv sync --extra azure
 ```
 
-There is **no committed `requirements.txt`**. `build.sh` exports deps from uv at build time and bundles them into `.python_packages/` inside the zip.
+There is **no committed `requirements.txt`**. `build.sh` exports deps from uv into the deploy zip; Azure **remote build** (`--build-remote`) installs them via Oryx on deploy.
 
 ## Local build (optional, debugging only)
 
