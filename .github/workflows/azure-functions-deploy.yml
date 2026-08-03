@@ -41,7 +41,9 @@ jobs:
           az functionapp deployment source config-zip \
             --resource-group "${{ vars.AZURE_VERIFY_RESOURCE_GROUP }}" \
             --name "${{ vars.AZURE_VERIFY_FUNCTION_APP }}" \
-            --src azure-function/release.zip
+            --src azure-function/release.zip \
+            --build-remote true \
+            --timeout 600
 
       - name: Restart Function App
         run: |
@@ -55,7 +57,7 @@ jobs:
           APP: ${{ vars.AZURE_VERIFY_FUNCTION_APP }}
           APIM: ${{ vars.AZURE_VERIFY_APIM_NAME }}
         run: |
-          sleep 30
+          sleep 60
           FUNCTION_KEY=$(az functionapp keys list -g "$RG" -n "$APP" --query "functionKeys.default" -o tsv)
           az apim nv update \
             -g "$RG" \
@@ -64,6 +66,28 @@ jobs:
             --value "$FUNCTION_KEY" \
             --secret true
 
+      - name: Wait for functions to register
+        env:
+          RG: ${{ vars.AZURE_VERIFY_RESOURCE_GROUP }}
+          APP: ${{ vars.AZURE_VERIFY_FUNCTION_APP }}
+        run: |
+          for i in $(seq 1 12); do
+            count=$(az functionapp function list -g "$RG" -n "$APP" --query "length(@)" -o tsv)
+            echo "Registered functions: ${count}"
+            if [ "${count}" -gt 0 ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "No functions registered after remote build"
+          exit 1
+
       - name: Smoke test APIM health
         run: |
-          curl -sf "${{ vars.AZURE_VERIFY_HEALTH_CHECK_URL }}" | grep -q '"status":"ok"'
+          response=$(curl -s -w "\nHTTP_CODE:%{http_code}" "${{ vars.AZURE_VERIFY_HEALTH_CHECK_URL }}")
+          body="${response%HTTP_CODE:*}"
+          code="${response##*HTTP_CODE:}"
+          echo "Health check returned HTTP ${code}"
+          echo "Body: ${body}"
+          test "${code}" = "200"
+          echo "${body}" | grep -q '"status":"ok"'
