@@ -1,5 +1,4 @@
 import pytest
-
 from shared.validation import validate_verify_body
 
 

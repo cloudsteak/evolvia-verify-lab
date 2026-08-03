@@ -31,5 +31,5 @@ jobs:
 
       - name: Test
         env:
-          PYTHONPATH: azure-function
+          PYTHONPATH: azure-function:.
         run: uv run pytest azure-function/tests/ -q

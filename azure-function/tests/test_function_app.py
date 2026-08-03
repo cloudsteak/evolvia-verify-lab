@@ -1,7 +1,6 @@
 import json
 
 import azure.functions as func
-
 from function_app import dispatcher, health
 
 

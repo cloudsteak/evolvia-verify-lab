@@ -2,7 +2,6 @@ import logging
 import os
 
 import azure.functions as func
-
 from labs.registry import run_lab
 from shared.responses import json_response
 from shared.validation import validate_verify_body
