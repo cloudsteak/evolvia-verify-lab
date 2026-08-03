@@ -149,3 +149,6 @@ Temporary Items
 
 # Kerno files
 .kerno/**
+
+# Azure Functions deploy artifact
+azure-function/release.zip
