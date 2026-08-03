@@ -115,6 +115,17 @@ uv sync --extra gcp
 PROVIDER=gcp uv run uvicorn main:app --reload
 ```
 
+## Azure Functions (serverless)
+
+Azure-native deployment for APIM + Function App (`azure-function/`):
+
+- `GET /health` — health check
+- `POST /dispatcher` — APIM maps from `/v1/verify`; routes to lab handlers
+
+Dependencies: `pyproject.toml` + `uv.lock` (`uv sync --extra azure`) — same as Docker.
+
+See [azure-function/README.md](azure-function/README.md) for build and deploy.
+
 ## Docker
 
 Azure image:
