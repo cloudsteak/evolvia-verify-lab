@@ -37,6 +37,7 @@ uv pip install \
 rm "${STAGING}/requirements.txt"
 
 cd "${STAGING}"
+rm -f "${ZIP_PATH}"
 zip -r "${ZIP_PATH}" . -x "*.pyc" -x "__pycache__/*"
 
 echo "Created ${ZIP_PATH}"

@@ -1,6 +1,6 @@
 # Azure Functions — Evolvia Verify Lab
 
-Azure-native verify service for the `evolvia-verify-azure` Function App.
+Azure-native verify service (Function App + APIM).
 
 Mirrors the AWS layout: `lambda/` for AWS, `azure-function/` for Azure.
 
@@ -23,7 +23,9 @@ uv sync --extra azure
 
 There is **no committed `requirements.txt`**. `build.sh` exports deps from uv at build time and bundles them into `.python_packages/` inside the zip.
 
-## Local build
+## Local build (optional, debugging only)
+
+Normal deploy is CD-only — do not run locally unless debugging packaging issues.
 
 ```bash
 cd azure-function
@@ -32,17 +34,16 @@ chmod +x build.sh
 # → release.zip
 ```
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.12.
-
 ## CI / CD
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | `azure-functions-ci.yml` | Pull request | Ruff lint + pytest (`uv sync --extra azure`) |
-| `azure-functions-deploy.yml` | Push to `main` | Build zip + deploy Function App |
+| `azure-functions-deploy.yml` | Push to `main` | Build, deploy, APIM key sync, smoke test |
 
-Full setup (infra, secrets, APIM function-key, backend config, smoke tests):
-[evolvia-foundation/azure/README.md](https://github.com/cloudsteak/evolvia-foundation/blob/main/azure/README.md)
+Full setup (infra, secrets, backend config): [evolvia-foundation/azure/README.md](https://github.com/cloudsteak/evolvia-foundation/blob/main/azure/README.md)
+
+Deploy is fully automated: push to `main` runs build, zip deploy, APIM function-key sync, and `/health` smoke test. No local scripts required.
 
 ### GitHub secrets (CD)
 
@@ -54,22 +55,45 @@ Set in this repo → Settings → Secrets (from `evolvia-foundation/azure/12-oid
 | `AZURE_DEPLOY_TENANT_ID` | `tofu output tenant_id` |
 | `AZURE_DEPLOY_SUBSCRIPTION_ID` | `tofu output subscription_id` |
 
+### GitHub variables (CD, required)
+
+Set in this repo → Settings → Secrets and variables → Actions → **Variables** (from `evolvia-foundation/azure/50-verify` outputs):
+
+```bash
+cd evolvia-foundation/azure/50-verify
+tofu output -raw resource_group_name
+tofu output -raw function_app_name
+tofu output -raw apim_name
+tofu output -raw health_check_url
+```
+
+If `apim_name` fails, run `tofu apply` in `50-verify` first.
+
+| Variable | Output |
+|----------|--------|
+| `AZURE_VERIFY_RESOURCE_GROUP` | `resource_group_name` |
+| `AZURE_VERIFY_FUNCTION_APP` | `function_app_name` |
+| `AZURE_VERIFY_APIM_NAME` | `apim_name` |
+| `AZURE_VERIFY_HEALTH_CHECK_URL` | `health_check_url` |
+
+The deploy workflow has **no in-repo defaults** for these names.
+
 ## Manual deploy
+
+Not needed for normal use — CD on push to `main` handles build, deploy, APIM key sync, and smoke test.
+
+Fallback only:
 
 ```bash
 cd azure-function && ./build.sh
 
+RG=$(cd ../evolvia-foundation/azure/50-verify && tofu output -raw resource_group_name)
+APP=$(cd ../evolvia-foundation/azure/50-verify && tofu output -raw function_app_name)
+
 az functionapp deployment source config-zip \
-  --resource-group evolvia-verify-rg \
-  --name evolvia-verify-azure \
-  --src azure-function/release.zip
-```
-
-After deploy, update the APIM `function-key` named value with the Function App host key:
-
-```bash
-az functionapp keys list -g evolvia-verify-rg -n evolvia-verify-azure \
-  --query "functionKeys.default" -o tsv
+  --resource-group "$RG" \
+  --name "$APP" \
+  --src release.zip
 ```
 
 ## Environment variables (Function App)

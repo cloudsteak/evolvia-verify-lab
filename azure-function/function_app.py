@@ -2,7 +2,6 @@ import logging
 import os
 
 import azure.functions as func
-from labs.registry import run_lab
 from shared.responses import json_response
 from shared.validation import validate_verify_body
 
@@ -60,6 +59,8 @@ def dispatcher(req: func.HttpRequest) -> func.HttpResponse:
     email = str(body["email"]).strip()
 
     logger.info("Dispatching: user=%s lab=%s", user, lab)
+
+    from labs.registry import run_lab
 
     result = run_lab(lab=lab, user=user, email=email)
     status_code = 404 if not result.get("success") and "Ismeretlen lab" in result.get("message", "") else 200
