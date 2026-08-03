@@ -1,17 +1,20 @@
 import os
 from collections.abc import Callable
 
-from checks.azure.basic.verify import run_verification as basic_verify
-
 LabHandler = Callable[..., dict]
 
-_LABS: dict[str, LabHandler] = {
-    "basic": basic_verify,
-}
+
+def _load_handler(lab: str) -> LabHandler | None:
+    if lab == "basic":
+        from checks.azure.basic.verify import run_verification
+
+        return run_verification
+    return None
 
 
 def run_lab(lab: str, user: str, email: str) -> dict:
-    handler = _LABS.get(lab.strip().lower())
+    normalized = lab.strip().lower()
+    handler = _load_handler(normalized)
     if handler is None:
         return {"success": False, "message": f"Ismeretlen lab: '{lab}'."}
 
@@ -24,7 +27,7 @@ def run_lab(lab: str, user: str, email: str) -> dict:
 
     return handler(
         user=user.strip(),
-        lab=lab.strip().lower(),
+        lab=normalized,
         email=email.strip(),
         subscription_id=subscription_id,
     )

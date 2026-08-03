@@ -23,6 +23,6 @@ def test_run_lab_basic_delegates(monkeypatch):
         assert kwargs["subscription_id"] == "00000000-0000-0000-0000-000000000001"
         return {"success": True, "message": "Lab sikeresen ellenőrizve."}
 
-    monkeypatch.setattr("labs.registry._LABS", {"basic": fake_verify})
+    monkeypatch.setattr("labs.registry._load_handler", lambda lab: fake_verify if lab == "basic" else None)
     result = run_lab(lab="basic", user="student1", email="student@example.com")
     assert result["success"] is True
