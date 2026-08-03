@@ -1,0 +1,35 @@
+name: Azure Functions - CI
+
+on:
+  pull_request:
+    paths:
+      - "azure-function/**"
+      - "checks/azure/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/azure-functions-ci.yml"
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra azure --group dev
+
+      - name: Lint
+        run: uv run ruff check azure-function/ checks/azure/
+
+      - name: Test
+        env:
+          PYTHONPATH: azure-function:.
+        run: uv run pytest azure-function/tests/ -q

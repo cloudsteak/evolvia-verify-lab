@@ -1,0 +1,44 @@
+name: Azure Functions - Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "azure-function/**"
+      - "checks/azure/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/azure-functions-deploy.yml"
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Azure login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_DEPLOY_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_DEPLOY_SUBSCRIPTION_ID }}
+
+      - name: Build deploy package
+        run: |
+          chmod +x azure-function/build.sh
+          azure-function/build.sh
+
+      - name: Deploy to Function App
+        run: |
+          az functionapp deployment source config-zip \
+            --resource-group "${{ vars.AZURE_VERIFY_RESOURCE_GROUP || 'evolvia-verify-rg' }}" \
+            --name "${{ vars.AZURE_VERIFY_FUNCTION_APP || 'evolvia-verify-azure' }}" \
+            --src azure-function/release.zip
