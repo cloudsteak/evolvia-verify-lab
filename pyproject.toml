@@ -28,3 +28,9 @@ gcp = [
     "google-cloud-compute>=1.22.0",
     "google-cloud-resource-manager>=1.14.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.9",
+]
