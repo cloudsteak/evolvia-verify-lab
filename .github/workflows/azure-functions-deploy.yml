@@ -67,7 +67,7 @@ jobs:
             body="${response%HTTP_CODE:*}"
             code="${response##*HTTP_CODE:}"
             echo "Attempt ${i}: HTTP ${code}"
-            if [ "${code}" = "200" ] && echo "${body}" | grep -q '"status":"ok"'; then
+            if [ "${code}" = "200" ] && echo "${body}" | grep -qE '"status"[[:space:]]*:[[:space:]]*"ok"'; then
               exit 0
             fi
             sleep 10
@@ -98,7 +98,7 @@ jobs:
             code="${response##*HTTP_CODE:}"
             echo "Attempt ${i}: HTTP ${code}"
             echo "Body: ${body}"
-            if [ "${code}" = "200" ] && echo "${body}" | grep -q '"status":"ok"'; then
+            if [ "${code}" = "200" ] && echo "${body}" | grep -qE '"status"[[:space:]]*:[[:space:]]*"ok"'; then
               exit 0
             fi
             sleep 10
