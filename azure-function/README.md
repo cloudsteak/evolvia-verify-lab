@@ -1,6 +1,6 @@
 # Azure Functions — Evolvia Verify Lab
 
-Azure-native verify service for the `evolvia-verify-azure` Function App.
+Azure-native verify service (Function App + APIM).
 
 Mirrors the AWS layout: `lambda/` for AWS, `azure-function/` for Azure.
 
@@ -55,6 +55,27 @@ Set in this repo → Settings → Secrets (from `evolvia-foundation/azure/12-oid
 | `AZURE_DEPLOY_TENANT_ID` | `tofu output tenant_id` |
 | `AZURE_DEPLOY_SUBSCRIPTION_ID` | `tofu output subscription_id` |
 
+### GitHub variables (CD, required)
+
+Set in this repo → Settings → Secrets and variables → Actions → **Variables** (from `evolvia-foundation/azure/50-verify` outputs):
+
+```bash
+cd evolvia-foundation/azure/50-verify
+tofu output -raw resource_group_name
+tofu output -raw function_app_name
+tofu output -raw apim_name
+tofu output -raw health_check_url
+```
+
+| Variable | Output |
+|----------|--------|
+| `AZURE_VERIFY_RESOURCE_GROUP` | `resource_group_name` |
+| `AZURE_VERIFY_FUNCTION_APP` | `function_app_name` |
+| `AZURE_VERIFY_APIM_NAME` | `apim_name` |
+| `AZURE_VERIFY_HEALTH_CHECK_URL` | `health_check_url` |
+
+The deploy workflow has **no in-repo defaults** for these names.
+
 ## Manual deploy
 
 Not needed for normal use — CD on push to `main` handles build, deploy, APIM key sync, and smoke test.
@@ -64,9 +85,12 @@ Fallback only:
 ```bash
 cd azure-function && ./build.sh
 
+RG=$(cd ../evolvia-foundation/azure/50-verify && tofu output -raw resource_group_name)
+APP=$(cd ../evolvia-foundation/azure/50-verify && tofu output -raw function_app_name)
+
 az functionapp deployment source config-zip \
-  --resource-group evolvia-verify-rg \
-  --name evolvia-verify-azure \
+  --resource-group "$RG" \
+  --name "$APP" \
   --src release.zip
 ```
 
