@@ -23,7 +23,9 @@ uv sync --extra azure
 
 There is **no committed `requirements.txt`**. `build.sh` exports deps from uv at build time and bundles them into `.python_packages/` inside the zip.
 
-## Local build
+## Local build (optional, debugging only)
+
+Normal deploy is CD-only — do not run locally unless debugging packaging issues.
 
 ```bash
 cd azure-function
@@ -32,17 +34,16 @@ chmod +x build.sh
 # → release.zip
 ```
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.12.
-
 ## CI / CD
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | `azure-functions-ci.yml` | Pull request | Ruff lint + pytest (`uv sync --extra azure`) |
-| `azure-functions-deploy.yml` | Push to `main` | Build zip + deploy Function App |
+| `azure-functions-deploy.yml` | Push to `main` | Build, deploy, APIM key sync, smoke test |
 
-Full setup (infra, secrets, APIM function-key, backend config, smoke tests):
-[evolvia-foundation/azure/README.md](https://github.com/cloudsteak/evolvia-foundation/blob/main/azure/README.md)
+Full setup (infra, secrets, backend config): [evolvia-foundation/azure/README.md](https://github.com/cloudsteak/evolvia-foundation/blob/main/azure/README.md)
+
+Deploy is fully automated: push to `main` runs build, zip deploy, APIM function-key sync, and `/health` smoke test. No local scripts required.
 
 ### GitHub secrets (CD)
 
@@ -56,20 +57,17 @@ Set in this repo → Settings → Secrets (from `evolvia-foundation/azure/12-oid
 
 ## Manual deploy
 
+Not needed for normal use — CD on push to `main` handles build, deploy, APIM key sync, and smoke test.
+
+Fallback only:
+
 ```bash
 cd azure-function && ./build.sh
 
 az functionapp deployment source config-zip \
   --resource-group evolvia-verify-rg \
   --name evolvia-verify-azure \
-  --src azure-function/release.zip
-```
-
-After deploy, update the APIM `function-key` named value with the Function App host key:
-
-```bash
-az functionapp keys list -g evolvia-verify-rg -n evolvia-verify-azure \
-  --query "functionKeys.default" -o tsv
+  --src release.zip
 ```
 
 ## Environment variables (Function App)

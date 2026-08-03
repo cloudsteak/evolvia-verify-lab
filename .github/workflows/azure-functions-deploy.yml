@@ -42,3 +42,30 @@ jobs:
             --resource-group "${{ vars.AZURE_VERIFY_RESOURCE_GROUP || 'evolvia-verify-rg' }}" \
             --name "${{ vars.AZURE_VERIFY_FUNCTION_APP || 'evolvia-verify-azure' }}" \
             --src azure-function/release.zip
+
+      - name: Restart Function App
+        run: |
+          az functionapp restart \
+            --resource-group "${{ vars.AZURE_VERIFY_RESOURCE_GROUP || 'evolvia-verify-rg' }}" \
+            --name "${{ vars.AZURE_VERIFY_FUNCTION_APP || 'evolvia-verify-azure' }}"
+
+      - name: Sync APIM function key
+        env:
+          RG: ${{ vars.AZURE_VERIFY_RESOURCE_GROUP || 'evolvia-verify-rg' }}
+          APP: ${{ vars.AZURE_VERIFY_FUNCTION_APP || 'evolvia-verify-azure' }}
+          APIM: ${{ vars.AZURE_VERIFY_APIM_NAME || 'evolvia-verify-apim' }}
+        run: |
+          sleep 30
+          FUNCTION_KEY=$(az functionapp keys list -g "$RG" -n "$APP" --query "functionKeys.default" -o tsv)
+          az apim nv update \
+            -g "$RG" \
+            --service-name "$APIM" \
+            --named-value-id function-key \
+            --value "$FUNCTION_KEY" \
+            --secret true
+
+      - name: Smoke test APIM health
+        env:
+          APIM: ${{ vars.AZURE_VERIFY_APIM_NAME || 'evolvia-verify-apim' }}
+        run: |
+          curl -sf "https://${APIM}.azure-api.net/health" | grep -q '"status":"ok"'
