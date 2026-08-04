@@ -20,7 +20,7 @@ cp "${SCRIPT_DIR}/host.json" "${STAGING}/"
 cp -R "${SCRIPT_DIR}/labs" "${STAGING}/labs"
 cp -R "${SCRIPT_DIR}/shared" "${STAGING}/shared"
 mkdir -p "${STAGING}/checks/azure"
-cp -R "${REPO_ROOT}/checks/azure/basic" "${STAGING}/checks/azure/basic"
+cp -R "${REPO_ROOT}/checks/azure/"* "${STAGING}/checks/azure/"
 touch "${STAGING}/checks/__init__.py" "${STAGING}/checks/azure/__init__.py"
 
 find "${STAGING}" -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

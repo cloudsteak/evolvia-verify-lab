@@ -11,7 +11,7 @@ Mirrors the AWS layout: `lambda/` for AWS, `azure-function/` for Azure.
 | `health` | GET | `/health` | Health check |
 | `dispatcher` | POST | `/v1/verify` | Lab verification router |
 
-Supported labs: `basic` (more can be registered in `labs/registry.py`).
+Supported labs: every directory under `checks/azure/` with a `verify.py` (e.g. `basic`, `mk-7-01-vm`, `mk-7-01-lb`, …). Routing uses dynamic import — same pattern as Docker `verify_lab.py`.
 
 ## Dependencies
 
