@@ -1,4 +1,29 @@
-from labs.registry import run_lab
+from pathlib import Path
+
+import pytest
+from labs.registry import _load_handler, run_lab
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+AZURE_CHECKS = REPO_ROOT / "checks" / "azure"
+
+
+def _azure_lab_names() -> list[str]:
+    return sorted(
+        path.name
+        for path in AZURE_CHECKS.iterdir()
+        if path.is_dir() and (path / "verify.py").is_file()
+    )
+
+
+@pytest.mark.parametrize("lab_name", _azure_lab_names())
+def test_load_handler_for_each_azure_lab(lab_name):
+    assert _load_handler(lab_name) is not None
+
+
+def test_load_handler_rejects_invalid_lab_names():
+    assert _load_handler("../basic") is None
+    assert _load_handler("foo.bar") is None
+    assert _load_handler("") is None
 
 
 def test_run_lab_unknown():

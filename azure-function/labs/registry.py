@@ -1,15 +1,27 @@
+import importlib
 import os
+import re
 from collections.abc import Callable
 
 LabHandler = Callable[..., dict]
 
+_LAB_NAME_PATTERN = re.compile(r"^[a-z0-9-]+$")
+
 
 def _load_handler(lab: str) -> LabHandler | None:
-    if lab == "basic":
-        from checks.azure.basic.verify import run_verification
+    if not _LAB_NAME_PATTERN.match(lab):
+        return None
 
-        return run_verification
-    return None
+    try:
+        module = importlib.import_module(f"checks.azure.{lab}.verify")
+    except ModuleNotFoundError:
+        return None
+
+    run_verification = getattr(module, "run_verification", None)
+    if not callable(run_verification):
+        return None
+
+    return run_verification
 
 
 def run_lab(lab: str, user: str, email: str) -> dict:
