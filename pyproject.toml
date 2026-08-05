@@ -1,14 +1,11 @@
 [project]
 name = "evolvia-verify-lab"
 version = "0.1.2"
-description = "Lab verification microservice for Evolvia"
+description = "Lab verification service for Evolvia (Azure Functions + AWS Lambda)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "email-validator>=2.3.0",
-    "fastapi>=0.128.0",
     "requests>=2.32.0",
-    "uvicorn>=0.40.0",
 ]
 
 [project.optional-dependencies]
@@ -21,13 +18,6 @@ azure = [
     "azure-mgmt-web>=10.1.0",
     "azure-search-documents>=11.6.0",
 ]
-aws = [
-    "boto3>=1.35.0",
-]
-gcp = [
-    "google-cloud-compute>=1.22.0",
-    "google-cloud-resource-manager>=1.14.0",
-]
 
 [dependency-groups]
 dev = [
@@ -37,6 +27,7 @@ dev = [
 
 [tool.ruff.lint.per-file-ignores]
 "checks/**" = ["BLE001", "G201", "LOG015"]
+"lambda/**" = ["BLE001"]
 
 [tool.uv]
 # Azure Functions runtime (glibc 2.31): cryptography 44+ breaks worker indexing

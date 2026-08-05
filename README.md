@@ -1,41 +1,20 @@
 # Evolvia Verify Lab
 
-Lab verification microservice for CloudMentor.
+Lab verification service for CloudMentor. Each cloud provider has its own serverless deployment path:
 
-## Multi-Provider Architecture
+| Cloud | Runtime | Code | Deploy |
+|-------|---------|------|--------|
+| Azure | Function App + APIM | `azure-function/` | `azure-functions-deploy.yml` |
+| AWS | Lambda + API Gateway | `lambda/` | `lambda-deploy.yml` |
 
-One codebase produces three provider-specific Docker images:
+Shared lab logic lives under `checks/`:
 
-- `azure`: installs only Azure SDK dependencies
-- `aws`: installs only AWS SDK dependencies
-- `gcp`: installs only GCP SDK dependencies
+- `checks/azure/` — Azure lab handlers (`verify.py` + `lab_spec.json`), packaged into the Function App zip
+- `checks/aws/` — `lab_spec.json` only; bundled into Lambda zips at deploy time
 
-The active provider is controlled by `PROVIDER`. The service exposes the same `POST /v1/verify` API contract for every image, while `GET /info` reports the active provider and service version.
+## API contract
 
-## API
-
-### Health Check
-
-```http
-GET /health
-```
-
-### Service Info
-
-```http
-GET /info
-```
-
-Example response:
-
-```json
-{
-  "provider": "azure",
-  "version": "0.1.2"
-}
-```
-
-### Verify Lab
+All entry points expose the same verify contract:
 
 ```http
 POST /v1/verify
@@ -50,34 +29,29 @@ Content-Type: application/json
 }
 ```
 
-## Environment Variables
+Azure also exposes `GET /health` on APIM (`/health`).
 
-### Common
+## Azure Functions
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PROVIDER` | Yes | Active provider: `azure`, `aws`, or `gcp` |
-| `INTERNAL_VERIFY_API_KEY` | No | Legacy common API key for authentication |
-| `INTERNAL_VERIFY_AZURE_API_KEY` | No | Azure verify API key; falls back to the common key |
-| `INTERNAL_VERIFY_AWS_API_KEY` | No | AWS verify API key; falls back to the common key |
-| `INTERNAL_VERIFY_GCP_API_KEY` | No | GCP verify API key; falls back to the common key |
+Production Azure verify runs on APIM + Function App — not Kubernetes.
 
-### Azure
+See [azure-function/README.md](azure-function/README.md) for build, deploy, and GitHub secrets/variables.
 
-| Variable | Required When | Description |
-|----------|---------------|-------------|
-| `AZURE_SUBSCRIPTION_ID` | `PROVIDER=azure` | Azure subscription ID |
-| `AZURE_TENANT_ID` | `PROVIDER=azure` | Azure tenant ID |
-| `AZURE_CLIENT_ID` | `PROVIDER=azure` | Service Principal client ID |
-| `AZURE_CLIENT_SECRET` | `PROVIDER=azure` | Service Principal client secret |
+Infra setup: [evolvia-foundation/azure/README.md](https://github.com/cloudsteak/evolvia-foundation/blob/main/azure/README.md)
 
-### AWS
+Local CI:
 
-| Variable | Required When | Description |
-|----------|---------------|-------------|
-| `AWS_ACCOUNT_ID` | `PROVIDER=aws` | Expected AWS account ID |
+```bash
+uv sync --frozen --extra azure --group dev
+uv run ruff check azure-function/ checks/azure/
+uv run pytest azure-function/tests/ -q
+```
 
-> **Megjegyzés:** Az AWS régió a lab `lab_spec.json` fájljából kerül beolvasásra, nem környezeti változóból.
+## AWS Lambda
+
+Production AWS verify runs on API Gateway + Lambda.
+
+Lab handlers live in `lambda/aws/`. The deploy workflow copies `checks/aws/<lab>/lab_spec.json` into each function zip.
 
 Available AWS labs:
 
@@ -86,65 +60,4 @@ Available AWS labs:
 - `s3-static-website`
 - `rds-mysql`
 
-### GCP
-
-| Variable | Required When | Description |
-|----------|---------------|-------------|
-| `GCP_PROJECT_ID` | `PROVIDER=gcp` | GCP project ID for Compute Engine and VPC checks |
-
-## Local Development
-
-Azure example:
-
-```bash
-uv sync --extra azure
-uv run uvicorn main:app --reload
-```
-
-AWS example:
-
-```bash
-uv sync --extra aws
-PROVIDER=aws uv run uvicorn main:app --reload
-```
-
-GCP example:
-
-```bash
-uv sync --extra gcp
-PROVIDER=gcp uv run uvicorn main:app --reload
-```
-
-## Azure Functions (serverless)
-
-Azure-native deployment for APIM + Function App (`azure-function/`):
-
-- `GET /health` — health check
-- `POST /dispatcher` — APIM maps from `/v1/verify`; routes to lab handlers
-
-Dependencies: `pyproject.toml` + `uv.lock` (`uv sync --extra azure`) — same as Docker.
-
-See [azure-function/README.md](azure-function/README.md) for build and deploy.
-
-## Docker
-
-Azure image:
-
-```bash
-docker build --build-arg PROVIDER=azure -t evolvia-verify-lab-azure .
-docker run -p 8000:8000 --env-file .env evolvia-verify-lab-azure
-```
-
-AWS image:
-
-```bash
-docker build --build-arg PROVIDER=aws -t evolvia-verify-lab-aws .
-docker run -p 8000:8000 --env-file .env evolvia-verify-lab-aws
-```
-
-GCP image:
-
-```bash
-docker build --build-arg PROVIDER=gcp -t evolvia-verify-lab-gcp .
-docker run -p 8000:8000 --env-file .env evolvia-verify-lab-gcp
-```
+Infra setup: [evolvia-foundation/aws/50-verify](https://github.com/cloudsteak/evolvia-foundation/tree/main/aws/50-verify)

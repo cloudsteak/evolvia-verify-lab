@@ -77,7 +77,7 @@ def lambda_handler(event, context):
                 "headers": {"Content-Type": "application/json"},
                 "body": json.dumps({"success": False, "message": msg}),
             }
-        logger.exception("Lambda invoke hiba: %s", error)
+        logger.exception("Lambda invoke hiba")
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
