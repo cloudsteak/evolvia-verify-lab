@@ -27,6 +27,6 @@ def lambda_handler(event, context):
         authorized = api_key == expected
         logger.info("Authorizer eredmény: authorized=%s", authorized)
         return {"isAuthorized": authorized}
-    except Exception as error:
-        logger.exception("Authorizer hiba: %s", error)
+    except Exception:
+        logger.exception("Authorizer hiba")
         return {"isAuthorized": False}

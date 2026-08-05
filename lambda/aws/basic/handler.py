@@ -132,10 +132,10 @@ def lambda_handler(event, context):
     try:
         result = _verify(account_id, user)
     except ClientError as error:
-        logger.exception("AWS API hiba: %s", error)
+        logger.exception("AWS API hiba")
         result = {"success": False, "message": f"AWS hiba történt: {error}"}
     except Exception as error:
-        logger.exception("Váratlan hiba: %s", error)
+        logger.exception("Váratlan hiba")
         result = {"success": False, "message": str(error)}
 
     logger.info(

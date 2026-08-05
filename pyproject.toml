@@ -27,6 +27,7 @@ dev = [
 
 [tool.ruff.lint.per-file-ignores]
 "checks/**" = ["BLE001", "G201", "LOG015"]
+"lambda/**" = ["BLE001"]
 
 [tool.uv]
 # Azure Functions runtime (glibc 2.31): cryptography 44+ breaks worker indexing
