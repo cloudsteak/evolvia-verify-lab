@@ -57,7 +57,7 @@ Available AWS labs:
 
 - `basic`
 - `ec2-linux`
-- `ec2-website`
+- `ec2-linux-apache`
 - `s3-static-website`
 - `rds-mysql`
 
