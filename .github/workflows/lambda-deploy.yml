@@ -58,3 +58,15 @@ jobs:
             --s3-bucket ${{ secrets.LAMBDA_S3_BUCKET }} \
             --s3-key aws/basic/handler.zip \
             --region eu-north-1
+
+      - name: Build and upload aws/ec2-linux
+        run: |
+          cd lambda/aws/ec2-linux
+          cp ../../../checks/aws/ec2-linux/lab_spec.json .
+          zip handler.zip handler.py lab_spec.json
+          aws s3 cp handler.zip s3://${{ secrets.LAMBDA_S3_BUCKET }}/aws/ec2-linux/handler.zip
+          aws lambda update-function-code \
+            --function-name evolvia-verify-aws-ec2-linux \
+            --s3-bucket ${{ secrets.LAMBDA_S3_BUCKET }} \
+            --s3-key aws/ec2-linux/handler.zip \
+            --region eu-north-1

@@ -56,6 +56,7 @@ Lab handlers live in `lambda/aws/`. The deploy workflow copies `checks/aws/<lab>
 Available AWS labs:
 
 - `basic`
+- `ec2-linux`
 - `ec2-website`
 - `s3-static-website`
 - `rds-mysql`
