@@ -1,5 +1,6 @@
 {
   "cloud": "aws",
+  "region": "eu-north-1",
   "checks": {
     "instance": {
       "prefix": "web-",
