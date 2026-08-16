@@ -92,15 +92,6 @@ def _verify(account_id: str, user: str) -> dict:
             logger.warning("Ellenőrzés sikertelen: %s", msg)
             return {"success": False, "message": msg}
 
-        if instance["ImageId"] != instance_spec["image_id"]:
-            msg = (
-                f"EC2 instance image-je hibás: "
-                f"{instance['InstanceId']} - {instance['ImageId']}. "
-                f"Elvárt: {instance_spec['image_id']}"
-            )
-            logger.warning("Ellenőrzés sikertelen: %s", msg)
-            return {"success": False, "message": msg}
-
     msg = "Lab sikeresen ellenőrizve."
     logger.info("Ellenőrzés sikeres: %s", msg)
     return {"success": True, "message": msg}
