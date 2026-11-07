@@ -3,7 +3,7 @@
   "checks": {
     "webapp": {
       "prefix": "weboldal-",
-      "runtime_stack": "NODE|22-lts",
+      "runtime_stack": "NODE|24-lts",
       "count": 1
     },
     "app_service_plan": {
