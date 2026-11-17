@@ -14,9 +14,7 @@ azure = [
     "azure-identity>=1.25.1",
     "azure-mgmt-compute>=37.1.0",
     "azure-mgmt-network>=30.1.0",
-    "azure-mgmt-search>=9.2.0",
     "azure-mgmt-web>=10.1.0",
-    "azure-search-documents>=11.6.0",
 ]
 
 [dependency-groups]
